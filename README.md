@@ -6,33 +6,18 @@
 
 ## 文件结构
 
-- Example_Data1：CT107D硬件平台的例程
-  
-  - IO模式例程
-  - MM模式例程
-- Example_Data2：单片机设计与开发实训指导（V40）配套例程
-  
-- Hardware_Data：CT107D硬件平台相关硬件资料
-  
-  - CT107D硬件平台相关芯片手册
-  - 功能测试程序.hex
-  - SCH_V40：V40版本原理图
-  - STC Monitor仿真器使用说明
-- Tools
-  
-  - 串口调试助手
-  - 解压缩软件
-  - C51v959.exe：Keil C51环境安装包
-  - PDF阅读器
-  - STC-ISP下载软件
-- USB_Driver：USB驱动_CT107D开发板与PC连接时的USB端口驱动
-  
-  - X64版
-  - X86版
-  - 驱动程序安装说明
-- image:图片
-  
 - doc:文档
+  - 单片机原理及接口技术开发板产品介绍
+  - 单片机原理及接口技术开发板规格书 
+  - 单片机原理及接口技术实验指导手册
+- example：综合测试程序
+  - 综合测试程序
+  - 测试程序介绍文件
+- datasheet：相关数据手册内容
+  
+- SCH:原理图
+
+- image:图片
   
 - LICENSE：许可证
   
