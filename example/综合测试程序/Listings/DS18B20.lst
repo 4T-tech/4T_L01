@@ -1,0 +1,176 @@
+C51 COMPILER V9.60.7.0   DS18B20                                                           09/26/2025 11:52:31 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE DS18B20
+OBJECT MODULE PLACED IN .\Objects\DS18B20.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE DS18B20.c COMPACT OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Li
+                    -stings\DS18B20.lst) TABS(2) OBJECT(.\Objects\DS18B20.obj)
+
+line level    source
+
+   1          //#include "stc12.h"
+   2          //#include "delay.h"
+   3          
+   4          //#include <intrins.h>
+   5          //#define uchar unsigned char
+   6          //#define uint unsigned int
+   7          //  
+   8          //sbit DQ=P2^7;
+   9          
+  10          //uchar code SegCode[]=
+  11          //{0xC0,0xF9,0xA4,0xB0,0x99,0x92,0x82,0xF8,0x80,0x90};//共阳极段码 0~9
+  12          //uchar code BitCode[]={0x08,0x04,0x02,0x01};           //位码:P0 口“1”有效
+  13          //uchar DispBuf[4]={0,0,0,0};           //显示缓冲区
+  14          //bit zf;
+  15          //int Temp;
+  16          
+  17          
+  18          
+  19          //void Display()
+  20          //{
+  21          //  uchar i;
+  22          //  for(i=0;i<4;i++)
+  23          //  {
+  24          //    SEG_CHOICE=1;
+  25          //    P0=SegCode[DispBuf[i]];
+  26          //    SEG_CHOICE=0;
+  27          //    P0=BitCode[i];
+  28          //    delay(10);
+  29          //  }
+  30          //}
+  31          
+  32          //void DS18B20_Init(void)
+  33          //{
+  34          //  DQ=0;
+  35          //  Delay_us(80);       //在数据线上产生约800μs的低电平
+  36          //  DQ =1;
+  37          //  Delay_us(6);          //数据线拉高,延时60μs
+  38          //  for(;;)
+  39          //  {
+  40          //    if(!DQ)break;     //读取总线电平,若DQ=0复位成功,DO=1复位失败
+  41          //  }
+  42          //  DQ=1;
+  43          //  Delay_us(10);
+  44          //}
+  45          
+  46          //uchar DS18B20_RByte(void)
+  47          //{
+  48          //  uchar i=0;
+  49          //  uchar dat=0;
+  50          //  for(i=8;i>0;i--)
+  51          //  {
+  52          //    DQ=0;
+  53          //    dat>>=1;
+  54          //    DQ =1;
+C51 COMPILER V9.60.7.0   DS18B20                                                           09/26/2025 11:52:31 PAGE 2   
+
+  55          //    Delay_us(10);       //总线拉高,延时 10μs
+  56          //    if(DQ)dat|=0x80;
+  57          //    Delay_us(50);       //延时 50 us
+  58          //  }
+  59          //  return(dat);
+  60          //}
+  61          
+  62          //void DS18B20_WByte(uchar dat)
+  63          //{
+  64          //  uchar i=0;
+  65          //  for(i=8;i>0;i--)
+  66          //  {
+  67          //    DQ=0;
+  68          //    DQ=dat&0x01;          //将当前数据放到总线上,低位在先,高位在后
+  69          //    Delay_us(50);           //延时 50 ws
+  70          //    DQ =1;                //总线拉高,为写入下一位做准备
+  71          //    dat>>=1;
+  72          //  }
+  73          //  
+  74          //}
+  75          
+  76          //void ReadRomCode(unsigned char *romcode)
+  77          //{
+  78          //  unsigned char i;
+  79          //  init;//复位
+  80          //  DS18B20_WByte(0x33);//读取ROM指令
+  81          //  for(i=0;i<8;i++)
+  82          //  {
+  83          //    romcode[i]=DS18B20_RByte();//读64位rom码
+  84          //  }
+  85          //  
+  86          //}
+  87          //void Read_Temp(void)      //读取 DS18B20芯片温度值
+  88          //{
+  89          //  uchar lo,hi;
+  90          //  int t;
+  91          //  DS18B20_Init();         //DS18B20芯片初始化
+  92          //  DS18B20_WByte(0xCC);    //跳过读序列号的命令(总线上仅有一个DS18B20芯片）
+  93          //  DS18B20_WByte(0x44);    //启动温度转换
+  94          //  DS18B20_Init();
+  95          //  DS18B20_WByte(0xCC);
+  96          //  DS18B20_WByte(0xBE);    //读暂存器命令
+  97          //  lo=DS18B20_RByte();     //读温度值低位
+  98          //  hi=DS18B20_RByte();     //读温度值高位
+  99          //  t=hi;
+ 100          //  t<<= 8;
+ 101          //  t =t|lo;
+ 102          //  if(t<0)
+ 103          //  {
+ 104          //    zf=1;                 //置负数标志
+ 105          //    t=~t+1;               //取补
+ 106          //  }
+ 107          //  Temp=t;
+ 108          //}
+ 109          
+ 110          //void Temp_to_Buff()       //计算实际温度值,并将温度值送显示缓冲区
+ 111          //{ 
+ 112          //  uchar shi,ge,xshu;
+ 113          //  float ft;
+ 114          //  uint tt;
+ 115          //  ft=Temp*0.0625;         //计算实际温度值
+ 116          //  tt= ft*10+0.5;          //将带小数(保留1位小数)的温度值扩展成整数
+C51 COMPILER V9.60.7.0   DS18B20                                                           09/26/2025 11:52:31 PAGE 3   
+
+ 117          //  shi=tt/100;             //实际温度值的十位(扩展后的百位)
+ 118          //  tt =tt% 100;
+ 119          //  ge= tt/10;              //实际温度值的个位(扩展后的十位)
+ 120          //  xshu =tt%10;            //实际温度值的小数位(扩展后的个位)
+ 121          //  if(zf==1)
+ 122          //  DispBuf[3]=0x40;        //符号位显示负号“_”
+ 123          //  else
+ 124          //  DispBuf[3]=0x00;              //符号位不显示(正数)
+ 125          //  DispBuf[2]=SegCode[shi];      //显示十位
+ 126          //  DispBuf[1]=SegCode[ge]&0x80;  //显示个位,同时显示 dp
+ 127          //  DispBuf[0]=SegCode[xshu];     //显示小数位
+ 128          //}
+ 129          
+ 130          //void main(void)
+ 131          //{
+ 132          //  uchar i;
+ 133          //  P4SW|=0X70;
+ 134          //  P0=0xff;
+ 135          //  LED_CHOICE=1;
+ 136          //  LED_CHOICE=0;
+ 137          //  while(1)
+ 138          //  {
+ 139          //    Read_Temp();
+ 140          //    Temp_to_Buff();
+ 141          //    for(i=0;i<100;i++)
+ 142          //    Display();
+ 143          //  }
+ 144          //}
+ 145          //  
+ 146          //  
+ 147          //  
+ 148          //  
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
