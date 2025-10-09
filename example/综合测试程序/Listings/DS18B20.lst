@@ -1,175 +1,222 @@
-C51 COMPILER V9.60.7.0   DS18B20                                                           09/26/2025 11:52:31 PAGE 1   
+C51 COMPILER V9.60.7.0   DS18B20                                                           09/28/2025 15:09:37 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE DS18B20
 OBJECT MODULE PLACED IN .\Objects\DS18B20.obj
-COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE DS18B20.c COMPACT OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Li
-                    -stings\DS18B20.lst) TABS(2) OBJECT(.\Objects\DS18B20.obj)
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE DS18B20.c COMPACT WARNINGLEVEL(0) OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTE
+                    -XTEND PRINT(.\Listings\DS18B20.lst) TABS(2) OBJECT(.\Objects\DS18B20.obj)
 
 line level    source
 
-   1          //#include "stc12.h"
-   2          //#include "delay.h"
+   1          #include "DS18B20.h"
+   2          
    3          
-   4          //#include <intrins.h>
-   5          //#define uchar unsigned char
-   6          //#define uint unsigned int
-   7          //  
-   8          //sbit DQ=P2^7;
-   9          
-  10          //uchar code SegCode[]=
-  11          //{0xC0,0xF9,0xA4,0xB0,0x99,0x92,0x82,0xF8,0x80,0x90};//共阳极段码 0~9
-  12          //uchar code BitCode[]={0x08,0x04,0x02,0x01};           //位码:P0 口“1”有效
-  13          //uchar DispBuf[4]={0,0,0,0};           //显示缓冲区
-  14          //bit zf;
-  15          //int Temp;
-  16          
-  17          
-  18          
-  19          //void Display()
-  20          //{
-  21          //  uchar i;
-  22          //  for(i=0;i<4;i++)
-  23          //  {
-  24          //    SEG_CHOICE=1;
-  25          //    P0=SegCode[DispBuf[i]];
-  26          //    SEG_CHOICE=0;
-  27          //    P0=BitCode[i];
-  28          //    delay(10);
-  29          //  }
-  30          //}
-  31          
-  32          //void DS18B20_Init(void)
-  33          //{
-  34          //  DQ=0;
-  35          //  Delay_us(80);       //在数据线上产生约800μs的低电平
-  36          //  DQ =1;
-  37          //  Delay_us(6);          //数据线拉高,延时60μs
-  38          //  for(;;)
-  39          //  {
-  40          //    if(!DQ)break;     //读取总线电平,若DQ=0复位成功,DO=1复位失败
-  41          //  }
-  42          //  DQ=1;
-  43          //  Delay_us(10);
-  44          //}
-  45          
-  46          //uchar DS18B20_RByte(void)
-  47          //{
-  48          //  uchar i=0;
-  49          //  uchar dat=0;
-  50          //  for(i=8;i>0;i--)
-  51          //  {
-  52          //    DQ=0;
-  53          //    dat>>=1;
-  54          //    DQ =1;
-C51 COMPILER V9.60.7.0   DS18B20                                                           09/26/2025 11:52:31 PAGE 2   
+   4          unsigned char romcode[8];
+   5          int Temp;
+   6          
+   7          unsigned char DispBuf[4]={1,1,1,1};           //显示缓冲区
+   8          
+   9          bit zf;
+  10          
+  11          
+  12          void Delay600us(void) //@11.0592MHz
+  13          {
+  14   1        unsigned char  i, j;
+  15   1      
+  16   1        _nop_();
+  17   1        _nop_();
+  18   1        i = 7;
+  19   1        j = 112;
+  20   1        do
+  21   1        {
+  22   2          while (--j);
+  23   2        } while (--i);
+  24   1      }
+  25          
+  26          void Delay60us(void)  //@11.0592MHz
+  27          {
+  28   1        unsigned char  i;
+  29   1      
+  30   1        i = 163;
+  31   1        while (--i);
+  32   1      }
+  33          
+  34          void Delay45us(void)  //@11.0592MHz
+  35          {
+  36   1        unsigned char  i;
+  37   1      
+  38   1        _nop_();
+  39   1        _nop_();
+  40   1        i = 121;
+  41   1        while (--i);
+  42   1      }
+  43          void Delay100us(void) //@11.0592MHz
+  44          {
+  45   1        unsigned char  i, j;
+  46   1      
+  47   1        i = 2;
+  48   1        j = 15;
+  49   1        do
+  50   1        {
+  51   2          while (--j);
+  52   2        } while (--i);
+  53   1      }
+  54          
+C51 COMPILER V9.60.7.0   DS18B20                                                           09/28/2025 15:09:37 PAGE 2   
 
-  55          //    Delay_us(10);       //总线拉高,延时 10μs
-  56          //    if(DQ)dat|=0x80;
-  57          //    Delay_us(50);       //延时 50 us
-  58          //  }
-  59          //  return(dat);
-  60          //}
-  61          
-  62          //void DS18B20_WByte(uchar dat)
-  63          //{
-  64          //  uchar i=0;
-  65          //  for(i=8;i>0;i--)
-  66          //  {
-  67          //    DQ=0;
-  68          //    DQ=dat&0x01;          //将当前数据放到总线上,低位在先,高位在后
-  69          //    Delay_us(50);           //延时 50 ws
-  70          //    DQ =1;                //总线拉高,为写入下一位做准备
-  71          //    dat>>=1;
-  72          //  }
-  73          //  
-  74          //}
-  75          
-  76          //void ReadRomCode(unsigned char *romcode)
-  77          //{
-  78          //  unsigned char i;
-  79          //  init;//复位
-  80          //  DS18B20_WByte(0x33);//读取ROM指令
-  81          //  for(i=0;i<8;i++)
-  82          //  {
-  83          //    romcode[i]=DS18B20_RByte();//读64位rom码
-  84          //  }
-  85          //  
-  86          //}
-  87          //void Read_Temp(void)      //读取 DS18B20芯片温度值
-  88          //{
-  89          //  uchar lo,hi;
-  90          //  int t;
-  91          //  DS18B20_Init();         //DS18B20芯片初始化
-  92          //  DS18B20_WByte(0xCC);    //跳过读序列号的命令(总线上仅有一个DS18B20芯片）
-  93          //  DS18B20_WByte(0x44);    //启动温度转换
-  94          //  DS18B20_Init();
-  95          //  DS18B20_WByte(0xCC);
-  96          //  DS18B20_WByte(0xBE);    //读暂存器命令
-  97          //  lo=DS18B20_RByte();     //读温度值低位
-  98          //  hi=DS18B20_RByte();     //读温度值高位
-  99          //  t=hi;
- 100          //  t<<= 8;
- 101          //  t =t|lo;
- 102          //  if(t<0)
- 103          //  {
- 104          //    zf=1;                 //置负数标志
- 105          //    t=~t+1;               //取补
- 106          //  }
- 107          //  Temp=t;
- 108          //}
- 109          
- 110          //void Temp_to_Buff()       //计算实际温度值,并将温度值送显示缓冲区
- 111          //{ 
- 112          //  uchar shi,ge,xshu;
- 113          //  float ft;
- 114          //  uint tt;
- 115          //  ft=Temp*0.0625;         //计算实际温度值
- 116          //  tt= ft*10+0.5;          //将带小数(保留1位小数)的温度值扩展成整数
-C51 COMPILER V9.60.7.0   DS18B20                                                           09/26/2025 11:52:31 PAGE 3   
+  55          
+  56          
+  57          void Delay1ms(void) //@11.0592MHz
+  58          {
+  59   1        unsigned char  i, j;
+  60   1      
+  61   1        _nop_();
+  62   1        i = 11;
+  63   1        j = 190;
+  64   1        do
+  65   1        {
+  66   2          while (--j);
+  67   2        } while (--i);
+  68   1      }
+  69          
+  70          
+  71          void Display()
+  72          {
+  73   1        unsigned char i;
+  74   1        for(i=0;i<4;i++)
+  75   1        {
+  76   2          SEG_CHOICE=1;
+  77   2          P0=DispBuf[i];
+  78   2          SEG_CHOICE=0;
+  79   2          P0=BitCode[i];
+  80   2          Delay1ms();
+  81   2        }
+  82   1      }
+  83          
+  84          unsigned char DS18B20_Init(void)
+  85          {
+  86   1        unsigned char x=0;
+  87   1        DQ=1;
+  88   1        _nop_();
+  89   1        _nop_();
+  90   1        DQ=0;
+  91   1        delay_us(600);
+  92   1        DQ=1;
+  93   1        delay_us(60);
+  94   1        x=DQ;
+  95   1        delay_us(100);
+  96   1      //  printf("x=%bu\n",x);
+  97   1        return x;
+  98   1      }
+  99          
+ 100          unsigned char DS18B20_RByte(void)
+ 101          {
+ 102   1        unsigned char i=0;
+ 103   1        unsigned char dat=0;
+ 104   1        for(i=8;i>0;i--)
+ 105   1        {
+ 106   2          DQ=1;
+ 107   2          _nop_();
+ 108   2          _nop_();
+ 109   2          DQ=0;
+ 110   2          dat>>=1;
+ 111   2          DQ=1;
+ 112   2          
+ 113   2          if(DQ)
+ 114   2            dat|=0x80;
+ 115   2          delay_us(60);
+ 116   2        }
+C51 COMPILER V9.60.7.0   DS18B20                                                           09/28/2025 15:09:37 PAGE 3   
 
- 117          //  shi=tt/100;             //实际温度值的十位(扩展后的百位)
- 118          //  tt =tt% 100;
- 119          //  ge= tt/10;              //实际温度值的个位(扩展后的十位)
- 120          //  xshu =tt%10;            //实际温度值的小数位(扩展后的个位)
- 121          //  if(zf==1)
- 122          //  DispBuf[3]=0x40;        //符号位显示负号“_”
- 123          //  else
- 124          //  DispBuf[3]=0x00;              //符号位不显示(正数)
- 125          //  DispBuf[2]=SegCode[shi];      //显示十位
- 126          //  DispBuf[1]=SegCode[ge]&0x80;  //显示个位,同时显示 dp
- 127          //  DispBuf[0]=SegCode[xshu];     //显示小数位
- 128          //}
- 129          
- 130          //void main(void)
- 131          //{
- 132          //  uchar i;
- 133          //  P4SW|=0X70;
- 134          //  P0=0xff;
- 135          //  LED_CHOICE=1;
- 136          //  LED_CHOICE=0;
- 137          //  while(1)
- 138          //  {
- 139          //    Read_Temp();
- 140          //    Temp_to_Buff();
- 141          //    for(i=0;i<100;i++)
- 142          //    Display();
- 143          //  }
- 144          //}
- 145          //  
- 146          //  
- 147          //  
- 148          //  
+ 117   1          return(dat);    
+ 118   1      }
+ 119          
+ 120          void DS18B20_WByte(unsigned char dat)
+ 121          {
+ 122   1        unsigned char i=0;
+ 123   1        for(i=8;i>0;i--)
+ 124   1        {
+ 125   2          DQ=0;
+ 126   2          
+ 127   2          DQ=dat&0x01;
+ 128   2          delay_us(60);
+ 129   2          DQ=1;
+ 130   2          dat>>=1;
+ 131   2        }
+ 132   1        delay_us(45);
+ 133   1      }
+ 134          
+ 135          void ReadRomCode(unsigned char *romcode)
+ 136          {
+ 137   1        unsigned char i;
+ 138   1        DS18B20_Init(); 
+ 139   1        DS18B20_WByte(0x33);//读取ROM指令
+ 140   1        for(i=0;i<8;i++)
+ 141   1        { 
+ 142   2          romcode[i]=DS18B20_RByte();//读64位rom码
+ 143   2        }
+ 144   1        
+ 145   1      }
+ 146          
+ 147          void Read_Temp(void)      //读取 DS18B20芯片温度值
+ 148          {
+ 149   1        unsigned char lo,hi;
+ 150   1        unsigned int t;
+ 151   1        DS18B20_Init();         //DS18B20芯片初始化
+ 152   1        DS18B20_WByte(0xCC);    //跳过读序列号的命令(总线上仅有一个DS18B20芯片）
+ 153   1        DS18B20_WByte(0x44);    //启动温度转换
+ 154   1        DS18B20_Init();
+ 155   1        DS18B20_WByte(0xCC);
+ 156   1        DS18B20_WByte(0xBE);    //读暂存器命令
+ 157   1        lo=DS18B20_RByte();     //读温度值低位
+ 158   1        hi=DS18B20_RByte();     //读温度值高位
+ 159   1      //  printf("lo=%bu\n",lo);
+ 160   1      //  printf("hi=%bu\n",hi);
+ 161   1        t=hi;
+ 162   1        t<<= 8;
+ 163   1        t =t|lo;
+ 164   1      //  t=((hi*256)+lo)>>4;
+ 165   1      //  printf("t=%d\n",t);
+ 166   1        if(t<0)
+ 167   1        {
+ 168   2          zf=1;                 //置负数标志
+ 169   2          t=~t+1;               //取补
+ 170   2        }
+ 171   1        Temp=t;
+ 172   1      //  printf("Temp=%d\n",Temp);
+ 173   1      }
+ 174          
+ 175          void Temp_to_Buff()       //计算实际温度值,并将温度值送显示缓冲区
+ 176          { 
+ 177   1        unsigned char shi,ge,xshu;
+ 178   1        float ft;
+C51 COMPILER V9.60.7.0   DS18B20                                                           09/28/2025 15:09:37 PAGE 4   
+
+ 179   1        unsigned int tt;
+ 180   1        ft=Temp*0.0625;         //计算实际温度值
+ 181   1        tt= ft*10+0.5;          //将带小数(保留1位小数)的温度值扩展成整数
+ 182   1        shi=tt/100;             //实际温度值的十位(扩展后的百位)
+ 183   1      //  tt =tt% 100;
+ 184   1        ge= (tt%100)/10;              //实际温度值的个位(扩展后的十位)
+ 185   1        xshu =(tt%100)%10;            //实际温度值的小数位(扩展后的个位)
+ 186   1      //  if(zf==1)
+ 187   1      //  DispBuf[3]=0xBF;        //符号位显示负号“_”
+ 188   1      //  else
+ 189   1        DispBuf[3]=0xFF;              //符号位不显示(正数)
+ 190   1        DispBuf[2]=SegCode[shi];      //显示十位
+ 191   1        DispBuf[1]=SegCode[ge]&0x7f;  //显示个位,同时显示 dp
+ 192   1        DispBuf[0]=SegCode[xshu];     //显示小数位
+ 193   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   ----    ----
+   CODE SIZE        =    518    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
-   PDATA SIZE       =   ----    ----
+   PDATA SIZE       =     14      16
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----
-   BIT SIZE         =   ----    ----
+   BIT SIZE         =      1    ----
 END OF MODULE INFORMATION.
 
 

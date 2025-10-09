@@ -1,7 +1,8 @@
 #ifndef __UART_H__
 #define __UART_H__
-#include <stc12.h> 
-#include <stdio.h>
+
+#include <main.h> 
+
 void UART_Init();
 void sendByte(unsigned char dat);
 //void sendString(unsigned char *dat);

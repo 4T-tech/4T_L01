@@ -1,5 +1,4 @@
-#include <stc12.h>
-#include "intrins.h"
+#include "LCD1602.h"
 
 
 //控制线定义

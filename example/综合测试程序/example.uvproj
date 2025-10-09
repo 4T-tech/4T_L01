@@ -7,7 +7,7 @@
 
   <Targets>
     <Target>
-      <TargetName>lql_test</TargetName>
+      <TargetName>example</TargetName>
       <ToolsetNumber>0x0</ToolsetNumber>
       <ToolsetName>MCS-51</ToolsetName>
       <uAC6>0</uAC6>
@@ -46,7 +46,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\Objects\</OutputDirectory>
-          <OutputName>lql_test</OutputName>
+          <OutputName>examle</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
@@ -315,7 +315,7 @@
             <UseInterruptVector>1</UseInterruptVector>
             <Fuzzy>3</Fuzzy>
             <Optimize>8</Optimize>
-            <WarningLevel>2</WarningLevel>
+            <WarningLevel>0</WarningLevel>
             <SizeSpeed>1</SizeSpeed>
             <ObjectExtend>1</ObjectExtend>
             <ACallAJmp>0</ACallAJmp>
@@ -348,7 +348,7 @@
             <DataOverlaying>1</DataOverlaying>
             <OverlayString></OverlayString>
             <MiscControls></MiscControls>
-            <DisableWarningNumbers></DisableWarningNumbers>
+            <DisableWarningNumbers>16</DisableWarningNumbers>
             <LinkerCmdFile></LinkerCmdFile>
             <Assign></Assign>
             <ReserveString></ReserveString>
@@ -387,11 +387,6 @@
               <FilePath>.\main.c</FilePath>
             </File>
             <File>
-              <FileName>stc12.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\stc12.h</FilePath>
-            </File>
-            <File>
               <FileName>iic.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\iic.c</FilePath>
@@ -402,24 +397,9 @@
               <FilePath>.\LCD1602.c</FilePath>
             </File>
             <File>
-              <FileName>LCD1602.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\LCD1602.h</FilePath>
-            </File>
-            <File>
               <FileName>Uart.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Uart.c</FilePath>
-            </File>
-            <File>
-              <FileName>Uart.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Uart.h</FilePath>
-            </File>
-            <File>
-              <FileName>delay.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\delay.h</FilePath>
             </File>
             <File>
               <FileName>delay.c</FileName>
@@ -427,9 +407,9 @@
               <FilePath>.\delay.c</FilePath>
             </File>
             <File>
-              <FileName>DS18B20.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\DS18B20.h</FilePath>
+              <FileName>DS18B20.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\DS18B20.c</FilePath>
             </File>
           </Files>
         </Group>

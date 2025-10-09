@@ -1,8 +1,0 @@
-".\Objects\STARTUP.obj",
-".\Objects\main.obj",
-".\Objects\iic.obj",
-".\Objects\LCD1602.obj",
-".\Objects\Uart.obj",
-".\Objects\delay.obj" 
-TO ".\Objects\lql_test" 
-PRINT(".\Listings\lql_test.m51") RAMSIZE(256) 

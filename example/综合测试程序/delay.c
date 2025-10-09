@@ -1,9 +1,5 @@
-
-#include "stc12.h"
-#include "intrins.h"
 #include "delay.h"
-#define uchar unsigned char
-#define uint unsigned  int
+
 /******延时函数******/
 static void Delaym1us()
 {
@@ -12,7 +8,7 @@ static void Delaym1us()
 
 //基于STC12单片机us延时函数
 //函数说明：外部调用
-void delay_us(uint time)
+void delay_us(unsigned int time)
 {
 	int i;
 	for(i=0; i<time; i++)
@@ -28,9 +24,9 @@ void delay_5us()
 }
 
 /*1Ms延时*/
-void delay(uint z)
+void delay(unsigned int z)
 {
-	uint x,y;
+	unsigned int x,y;
 	for(x = z; x > 0; x--)
 		for(y = 114; y > 0 ; y--);
 }

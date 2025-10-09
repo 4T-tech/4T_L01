@@ -1,149 +1,7 @@
-//#include "iic.h"
-
-//#define delay_time	5
-
-//static void iic_delay(unsigned char n)
-//{
-//	do
-//	{
-//		_nop_();_nop_();_nop_();_nop_();_nop_();
-//		_nop_();_nop_();_nop_();_nop_();_nop_();
-//		_nop_();_nop_();_nop_();_nop_();_nop_();		
-//	}
-//	while(n--);      	
-//}
-
-////
-//void iic_start(void)
-//{
-//	sda = 1;
-//	scl = 1;
-//	iic_delay(delay_time);
-//	sda = 0;
-//	iic_delay(delay_time);
-//	scl = 0;    
-//}
-
-////
-//void iic_stop(void)
-//{
-//	sda = 0;
-//	scl = 1;
-//	iic_delay(delay_time);
-//	sda = 1;
-//	iic_delay(delay_time);
-//}
-
-////
-//void iic_send_byte(unsigned char byt)
-//{
-//	unsigned char i;
-//	
-//	for(i=0; i<8; i++)
-//	{
-//		scl = 0;
-//		iic_delay(delay_time);
-//		if(byt & 0x80)
-//		{
-//			sda = 1;
-//		}
-//		else{
-//			sda = 0;
-//		}
-//		iic_delay(delay_time);
-//		scl = 1;
-//		byt <<= 1;
-//		iic_delay(delay_time);
-//	}
-//	scl = 0;  
-//}
-
-////
-//unsigned char iic_wait_ack(void)
-//{
-//	unsigned char ack_bit;
-//	
-//	scl = 1;
-//	iic_delay(delay_time);
-//	ack_bit = sda; 
-//	scl = 0;
-//	iic_delay(delay_time);
-//	
-//	return ack_bit;
-//}
-
-////
-//unsigned char iic_receive_byte(void)
-//{
-//	unsigned char da;
-//	unsigned char i;
-//	for(i=0;i<8;i++){   
-//		scl = 1;
-//		iic_delay(delay_time);
-//		da <<= 1;
-//		if(sda) 
-//			da |= 0x01;
-//		scl = 0;
-//		iic_delay(delay_time);
-//	}
-//	return da;    
-//}
-
-////
-//void iic_send_ack(unsigned char ack_bit)
-//{
-//	scl = 0;
-//	sda = ack_bit; 
-//	iic_delay(delay_time);
-//	scl = 1;
-//	iic_delay(delay_time);
-//	scl = 0; 
-//	sda = 1;
-//	iic_delay(delay_time);
-//}
-
-
-
-
 #include "iic.h"
 
 
-#define uchar unsigned char
-#define uint unsigned  int
 #define AT24C02_ADDR  0xa0	//AT24C02地址
-
-
-////基于STC12单片机1us延时函数
-////函数说明：内部调用
-//static void Delaym1us()
-//{
-//	_nop_();
-//}
-
-////基于STC12单片机us延时函数
-////函数说明：外部调用
-//void Delay_us(uint time)
-//{
-//	int i;
-//	for(i=0; i<time; i++)
-//	{
-//		Delaym1us();
-//	}
-//}
-
-///*5us延时*/
-//void delay_5us()  
-//{
-//	Delay_us(5);
-//}
-
-///*1Ms延时*/
-//void delay(uint z)
-//{
-//	uint x,y;
-//	for(x = z; x > 0; x--)
-//		for(y = 114; y > 0 ; y--);
-//}
 
 /*I2C初始化*/
 void I2C_init()	
@@ -219,9 +77,9 @@ bit Test_ACK()
 }
 
 /*发送一个字节*/
-void I2C_send_byte(uchar byte)
+void I2C_send_byte(unsigned char byte)
 {
-	uchar i;
+	unsigned char i;
 	for(i = 0 ; i < 8 ; i++)
 	{
 		scl = 0;
@@ -248,9 +106,9 @@ void I2C_send_byte(uchar byte)
 
 
 /*I2C 读一字节*/
-uchar I2C_read_byte()
+unsigned char I2C_read_byte()
 {
-	uchar dat,i;
+	unsigned char dat,i;
 	scl = 0;
 	_nop_();
 	sda = 1;
@@ -279,7 +137,7 @@ uchar I2C_read_byte()
 }
 
 /*I2C发送数据*/
-bit I2C_TransmitData(uchar ADDR, DAT)
+bit I2C_TransmitData(unsigned char ADDR, DAT)
 {
 	I2C_Start();
 	I2C_send_byte(AT24C02_ADDR+0);
@@ -302,9 +160,9 @@ bit I2C_TransmitData(uchar ADDR, DAT)
 }
 
 /*I2C接收数据*/
-uchar I2C_ReceiveData(uchar ADDR)
+unsigned char I2C_ReceiveData(unsigned char ADDR)
 {
-	uchar DAT;
+	unsigned char DAT;
 	I2C_Start();
 	I2C_send_byte(AT24C02_ADDR+0);
 	if (!Test_ACK())

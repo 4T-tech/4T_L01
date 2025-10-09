@@ -1,119 +1,79 @@
-#include "stc12.h"
-/* 综合测试程序包括 
-1.串口播报和注册码
-2.流水灯
-3.18b20 1602显示
-4.按键切换功能
-5.E2上电次数
-6.adc 数码管显示
-7.蜂鸣器
 
-*/ 
+#include "main.h"
 
-#include "stdio.h"
-#include "string.h"
-#include "iic.h"
-#include "LCD1602.h"
-#include "Uart.h"
-#include "delay.h"
-#include "DS18B20.h"
+/*数码管显示相关*/
+unsigned char SegCode[10]={0xC0,0xF9,0xA4,0xB0,0x99,0x92,0x82,0xF8,0x80,0x90};//共阴极段码0~9
+unsigned char BitCode[4]={0x08,0x04,0x02,0x01};	//位码:P0口“1”有效
 
-/******设置按键******/
-//sbit LED_CHOICE = P2^3;
-//sbit SEG_CHOICE = P2^4;
+/*按键定义与蜂鸣器定义*/
 sbit beep = P4^0;
 sbit S1 = P3^0;
 sbit S2 = P3^1;
 sbit S3 = P3^2;
 sbit S4 = P3^3;
-/********************/
+static unsigned char key_flag = 0; //按键标志
 
-/******设置ADC******/
+/*ADC相关定义以及AD显示数目缓冲区*/
 sbit CS=P4^5;
 sbit CLK=P4^1;
 sbit DOUT=P4^3;
-//const unsigned char code SegCode[]={0xC0,0xF9,0xA4,0xB0,0x99,0x92,0x82,0xF8,0x80,0x90};//共阴极段码0~9
-//const unsigned char code BitCode[]={0x08,0x04,0x02,0x01};	//位码:P0口“1”有效
-unsigned char DispBuf_AD[4]={0,0,0,0};								//显示缓冲区
-float Volt;
-static unsigned char key_flag = 0;
-/********************/
+unsigned char DispBuf_AD[4]={0,0,0,0};								//显示缓冲区  
+float Volt;								//电压值
+unsigned char digits[4];	//BCD码
 
-unsigned char digits[4];
-unsigned char boot_times;
+/*eeprom*/
+unsigned char boot_times;	//商店次数
 
 
-void uart_init();
-void uart_printf(unsigned char *tdata);
 void led_running();
 void seg_display(unsigned char *tdata,unsigned char longth);
-void write_AT24C02(unsigned char addr, unsigned char dat);
 void AT_Buff();
 void DisplayBootTimes();
-void rtc_init();
-void adc_init();
-void buzz_running();
-void PlayNote(unsigned int frequency, unsigned int duration);
 void key_check();
+void process_key_flags(void);
+unsigned char at24c02_init();
 
+void main()
+{ 
+	unsigned char i,temp;
+	unsigned char j=0;
+	unsigned char ROM[16]={8,8,8,8,8,8,8,8};
+	CS = 1;
+	SEG_CHOICE=0;
+	LED_CHOICE=1;	
+	led_running();
+	LED_CHOICE=0;
+	P4SW|=0xFF;
+	UART_Init();
+	CS = 0;
+	DQ = 1;
 
-/******串口部分******/
-/*串口初始化*/
-//void uart_init()
-//{
-//	TMOD=0x20;        //定时器T1工作于方式2
-//	TL1=0xfd;         //波特率为9600bps
-//	TH1=0xfd;
-//	TR1=1;
-//	EA=1;
-//	ES=1;
-//	SCON=0x50;        //定义串行口工作于方式1
-//}
-/*上报版本号,版本号还不知道怎么获取*/
-void uart_printf(unsigned char *tdata)
-{
-    unsigned char i;
-    unsigned char printf_data[33] = "$TEALQL$000000000000000000000000$"; /*$TEALQL$XXXXXXXXXXXXXXXXXXXXXX$*/
-    unsigned char error_pattern_1[17] = "0000000000000000";
-    unsigned char error_pattern_2[17] = "FFFFFFFFFFFFFFFF";
-    unsigned char error_message[] = "ERROR";
+	i = 100;
+	while(i--) seg_display(ROM,8);
+	
+	boot_times = at24c02_init();
+	AT_Buff();
+	
+	while (S1!=0&&S2!=0&&S3!=0&&S4!=0)
+	{
+    DisplayBootTimes();
+	}
+	CS = 1;
+	DQ = 0;
+	
+///******1602液晶显示******/
+//	init_1602();
+//	dsp_string(0,"  Welcome...",12);
+//	dsp_string(1," www.gxct.net",13);
+///******1602液晶显示******/
 
-    // 检查tdata是否为错误模式之一
-    if (memcmp(tdata, error_pattern_1, 16) == 0 || 
-        memcmp(tdata, error_pattern_2, 16) == 0) 
-		{
-        // 如果是错误模式，则发送“ERROR”
-        for (i = 0; i<5; i++) { // -1以忽略字符串结束符'\0'
-            SBUF = error_message[i]; // 发送第i个字符
-            while (TI == 0);         // 查询等待发送是否完成
-            TI = 0;                  // 发送完成，TI由软件清0
-        }
-        return; // 结束函数，不继续发送原始数据
-    }
-
-    // 正常情况下，将tdata复制到printf_data并发送
-    memcpy(printf_data + 8, tdata, 16);
-
-    // 发送数据包
-    for (i=0; i<33; i++)
-    {
-        SBUF = printf_data[i]; // 发送第i个数据
-        while (TI == 0);       // 查询等待发送是否完成
-        TI = 0;                // 发送完成，TI由软件清0
-    }
+	while(1)
+	{
+		key_check();
+		process_key_flags();
+	}
 }
-//void uart_printf(unsigned char *tdata)
-//{
-//	unsigned char i;
-//	unsigned char printf_data[33] = "$TEALQL$000000000000000000000000$";	/*$TEALQL$XXXXXXXXXXXXXXXXXXXXXX$*/
-//	memcpy(printf_data+8,tdata,16);
-//	for (i=0;i<33;i++)
-//	{
-//		SBUF=printf_data[i]; 			// 发送第i个数据
-//		while(TI==0);     // 查询等待发送是否完成
-//		TI=0;	      // 发送完成，TI由软件清0
-//	}
-//}
+/********************************************************************/
 
 /******流水灯******/
 void led_running()
@@ -137,7 +97,6 @@ void led_running()
 		P0=0xff;
 		
 }
-
 
 /******数码管显示******/
 void seg_display(unsigned char *tdata,unsigned char longth)
@@ -274,10 +233,6 @@ void DisplayBootTimes()
 }
 
 
-
-
-
-
 /******模数转换******/
 unsigned int TLC549_ADC(void)
 {
@@ -401,86 +356,45 @@ void key_check(void)
 void process_key_flags(void)
 {
     switch(key_flag) {
-        case 1: // S1按键按下
-        {
-            unsigned char i = 0;
-            unsigned int ad;
-            while(S4 != 0) {
-                i++;
-                if(i == 20) {
-                    ad = TLC549_ADC();
-                    i = 0;
-                }
-                Volt = 5.0 * ad / 255.0 * 1000.0;
-                AD_Buff();
-                adc_display();
-            }
-            break;
-        }
-        case 2: // S2按键按下
-        {
-            while(S4 != 0) {
-                Read_Temp();
-                Temp_to_Buff();
-                Display();
-            }
-            break;
-        }
-        case 3: // S3按键按下
-        {
-            buzz_running();
-            break;
-        }
-        case 4: // S4按键按下
-        {
-            // 这里添加S4按键的功能实现
-            break;
-        }
-        default:
-            break;
+			case 1: // S1按键按下
+			{
+					unsigned char i = 0;
+					unsigned int ad;
+					while((S2&S3&S4) == 1) {
+							i++;
+							if(i == 20) {
+									ad = TLC549_ADC();
+									i = 0;
+							}
+							Volt = 5.0 * ad / 255.0 * 1000.0;
+							AD_Buff();
+							adc_display();
+					}
+					break;
+			}
+			case 2: // S2按键按下
+			{
+					while((S1&S3&S4)  != 0) {
+							Read_Temp();
+							Temp_to_Buff();
+							Display();
+					}
+					break;
+			}
+			case 3: // S3按键按下
+			{
+					buzz_running();
+					break;
+			}
+			case 4: // S4按键按下
+			{
+					while((S1&S2&S3)  != 0) {
+						DisplayBootTimes();
+					}
+					break;
+			}
+			default:
+					break;
     }
 }
 
-void main()
-{ 
-	unsigned char i,temp;
-	unsigned char j=0;
-	unsigned char ROM[16]={8,8,8,8,8,8,8,8};
-	CS = 1;
-	SEG_CHOICE=0;
-	LED_CHOICE=1;	
-	led_running();
-	LED_CHOICE=0;
-	P4SW|=0xFF;
-	UART_Init();
-	CS = 0;
-	DQ = 1;
-
-	i = 100;
-	while(i--) seg_display(ROM,8);
-	
-	
-	boot_times = at24c02_init();
-//	printf("boot_times=%bu\n",boot_times);
-	AT_Buff();
-//	DisplayBootTimes();
-	
-	while (S1!=0&&S2!=0&&S3!=0&&S4!=0)
-	{
-    DisplayBootTimes();
-	}
-	CS = 1;
-	DQ = 0;
-	
-///******1602液晶显示******/
-//	init_1602();
-//	dsp_string(0,"  Welcome...",12);
-//	dsp_string(1," www.gxct.net",13);
-///******1602液晶显示******/
-
-	while(1)
-	{
-		key_check();
-		process_key_flags();
-	}
-}
