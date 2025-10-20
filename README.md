@@ -2,7 +2,8 @@
 
 单片机应用技术开发板硬件资料
 
-<img width="794" height="615" alt="image" src="https://github.com/user-attachments/assets/fffb4ef6-2922-4c8a-9fc2-92d492d41741" />
+![主视图(1)](https://github.com/user-attachments/assets/74b1261a-2128-485e-af1d-d8ba2e280cfc)
+
 
 ## 文件结构
 
