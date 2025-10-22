@@ -1,0 +1,215 @@
+C51 COMPILER V9.60.7.0   IIC                                                               09/28/2025 15:09:36 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE IIC
+OBJECT MODULE PLACED IN .\Objects\iic.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE iic.c COMPACT WARNINGLEVEL(0) OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEN
+                    -D PRINT(.\Listings\iic.lst) TABS(2) OBJECT(.\Objects\iic.obj)
+
+line level    source
+
+   1          #include "iic.h"
+   2          
+   3          
+   4          #define AT24C02_ADDR  0xa0  //AT24C02地址
+   5          
+   6          /*I2C初始化*/
+   7          void I2C_init() 
+   8          {
+   9   1        sda = 1;
+  10   1        _nop_();
+  11   1        scl = 1;
+  12   1        _nop_();
+  13   1      }
+  14          
+  15          /*I2C起始信号*/
+  16          void I2C_Start()  
+  17          {
+  18   1        scl = 1;
+  19   1        _nop_();
+  20   1        sda = 1;
+  21   1        delay_5us();
+  22   1        sda = 0;
+  23   1        delay_5us();
+  24   1      }
+  25          
+  26          /*I2C终止信号*/
+  27          void I2C_Stop()
+  28          {
+  29   1        sda = 0;
+  30   1        _nop_();
+  31   1        scl = 1;
+  32   1        delay_5us();
+  33   1        sda = 1;
+  34   1        delay_5us();
+  35   1      }
+  36          
+  37          /*主机发送应答*/
+  38          void Master_ACK(bit i)    
+  39          {
+  40   1        scl = 0; // 拉低时钟总线允许sda数据总线上的数据变化
+  41   1        _nop_(); // 让总线稳定
+  42   1        if (i)   //如果i = 1 那么拉低数据总线 表示主机应答
+  43   1        {
+  44   2          sda = 0;
+  45   2        }
+  46   1        else   
+  47   1        {
+  48   2          sda = 1;   //发送非应答
+  49   2        }
+  50   1        _nop_();//让总线稳定
+  51   1        scl = 1;//拉高时钟总线 让从机从sda线上读走 主机的应答信号
+  52   1        delay_5us();
+  53   1        scl = 0;//拉低时钟总线， 占用总线继续通信
+  54   1        _nop_();
+C51 COMPILER V9.60.7.0   IIC                                                               09/28/2025 15:09:36 PAGE 2   
+
+  55   1        sda = 1;//释放sda数据总线。
+  56   1        _nop_();
+  57   1      }
+  58          
+  59          /*检测从机应答*/
+  60          bit Test_ACK()
+  61          {
+  62   1        scl = 1;
+  63   1        delay_5us();
+  64   1        if (sda)
+  65   1        {
+  66   2          scl = 0;
+  67   2          _nop_();
+  68   2          I2C_Stop();
+  69   2          return(0);
+  70   2        }
+  71   1        else
+  72   1        {
+  73   2          scl = 0;
+  74   2          _nop_();
+  75   2          return(1);
+  76   2        }
+  77   1      }
+  78          
+  79          /*发送一个字节*/
+  80          void I2C_send_byte(unsigned char byte)
+  81          {
+  82   1        unsigned char i;
+  83   1        for(i = 0 ; i < 8 ; i++)
+  84   1        {
+  85   2          scl = 0;
+  86   2          _nop_();
+  87   2          if (byte & 0x80)
+  88   2          {       
+  89   3            sda = 1;  
+  90   3            _nop_();           
+  91   3          }       
+  92   2          else
+  93   2          {
+  94   3            sda = 0;
+  95   3            _nop_();
+  96   3          }
+  97   2          scl = 1;
+  98   2          _nop_();
+  99   2          byte <<= 1; // 0101 0100B 
+ 100   2        }
+ 101   1        scl = 0;
+ 102   1        _nop_();
+ 103   1        sda = 1;
+ 104   1        _nop_();
+ 105   1      }
+ 106          
+ 107          
+ 108          /*I2C 读一字节*/
+ 109          unsigned char I2C_read_byte()
+ 110          {
+ 111   1        unsigned char dat,i;
+ 112   1        scl = 0;
+ 113   1        _nop_();
+ 114   1        sda = 1;
+ 115   1        _nop_();
+ 116   1        for(i = 0 ; i < 8 ; i++)
+C51 COMPILER V9.60.7.0   IIC                                                               09/28/2025 15:09:36 PAGE 3   
+
+ 117   1        {
+ 118   2          scl = 1;
+ 119   2          _nop_();
+ 120   2          if (sda)          
+ 121   2          {
+ 122   3             dat |= 0x01; //
+ 123   3          }
+ 124   2          else
+ 125   2          {
+ 126   3            dat &=  0xfe; //1111 1110
+ 127   3          }
+ 128   2          _nop_();
+ 129   2          scl = 0 ;
+ 130   2          _nop_();
+ 131   2          if(i < 7)
+ 132   2          {
+ 133   3            dat = dat << 1; 
+ 134   3          }
+ 135   2        }
+ 136   1        return(dat);
+ 137   1      }
+ 138          
+ 139          /*I2C发送数据*/
+ 140          bit I2C_TransmitData(unsigned char ADDR, DAT)
+ 141          {
+ 142   1        I2C_Start();
+ 143   1        I2C_send_byte(AT24C02_ADDR+0);
+ 144   1        if (!Test_ACK())
+ 145   1        {
+ 146   2          return(0);
+ 147   2        }
+ 148   1        I2C_send_byte(ADDR); 
+ 149   1        if (!Test_ACK())
+ 150   1        {
+ 151   2          return(0);
+ 152   2        }
+ 153   1        I2C_send_byte(DAT);
+ 154   1        if (!Test_ACK())
+ 155   1        {
+ 156   2          return(0);
+ 157   2        }
+ 158   1        I2C_Stop();
+ 159   1        return(1);  
+ 160   1      }
+ 161          
+ 162          /*I2C接收数据*/
+ 163          unsigned char I2C_ReceiveData(unsigned char ADDR)
+ 164          {
+ 165   1        unsigned char DAT;
+ 166   1        I2C_Start();
+ 167   1        I2C_send_byte(AT24C02_ADDR+0);
+ 168   1        if (!Test_ACK())
+ 169   1        {
+ 170   2          return(0);
+ 171   2        }
+ 172   1        I2C_send_byte(ADDR);
+ 173   1        Master_ACK(0);
+ 174   1        I2C_Start();
+ 175   1        I2C_send_byte(AT24C02_ADDR+1);
+ 176   1        if (!Test_ACK())
+ 177   1        {
+ 178   2          return(0);
+C51 COMPILER V9.60.7.0   IIC                                                               09/28/2025 15:09:36 PAGE 4   
+
+ 179   2        }
+ 180   1        DAT = I2C_read_byte();
+ 181   1        Master_ACK(0);
+ 182   1        I2C_Stop();
+ 183   1        return(DAT);  
+ 184   1      }
+ 185          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    277    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----       5
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       1
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
