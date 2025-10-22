@@ -2,7 +2,7 @@
 
 单片机应用技术开发板硬件资料
 
-<img src="%5B4%5D图片/单片机原理及接口技术开发板.png" alt="单片机原理及接口技术开发板.png" width="60%">
+<img src="%5B4%5D图片/单片机原理及接口技术开发板.png" alt="单片机原理及接口技术开发板.png" width="100%">
 
 
 ## 文件结构
@@ -41,4 +41,4 @@
   - 交流社区：https://www.4t.wiki/community
   - 学习资源：https://www.4t.wiki/curriculum
 - Bilibili平台：参赛选手经验分享、试题解析，B站搜索“四梯科技”
-<img src="%5B4%5D图片/4T_B站.png" alt="4T_B站.png" width="60%"> <img src="%5B4%5D图片/4T_公众号.png" alt="4T_公众号.png" width="60%">
+<img src="%5B4%5D图片/4T_B站.png" alt="4T_B站.png" width="25%"> <img src="%5B4%5D图片/4T_公众号.png" alt="4T_公众号.png" width="25%">
